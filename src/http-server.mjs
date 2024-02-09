@@ -13,6 +13,33 @@ function safeJoin(rootDirectory, untrustedPath) {
     return join(rootDirectory, join(sep, untrustedPath));
 }
 
+function generateIndex(directoryName, entries) {
+    const tokens = [
+        `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>Index of `, directoryName, `</title>
+</head>
+<!-- Licensed under the MIT License. -->
+<body>` ];
+
+    for (const entry of entries) {
+        tokens.push('    <a href="', entry.name);
+
+        if (entry.isDirectory()) {
+            tokens.push('/');
+        }
+
+        tokens.push('">', entry.name, '</a><br/>');
+    }
+
+    tokens.push('</body>\n</html>');
+
+    return tokens.join("");
+}
+
 /** Represents an HTTP server. */
 export class HTTPServer {
     /**
@@ -86,16 +113,22 @@ export class HTTPServer {
                 }
 
                 if (stats.isDirectory()) {
-                    readdir(fullPath, { withFileTypes: true }, (err, files) => {
+                    const options = {
+                        withFileTypes: true
+                    };
+
+                    readdir(fullPath, options, (err, entries) => {
+                        const response = new Response(socket);
+
                         if (err) {
-                            new Response(socket, 500).send();
+                            response.status(500).send();
 
                             return;
                         }
 
-                        for (const file of files) {
-
-                        }
+                        response
+                            .status(200)
+                            .send(generateIndex(fullPath, entries));
                     });
 
                     return;
@@ -107,20 +140,19 @@ export class HTTPServer {
 
                         if (err) {
                             response.status(500).send();
-                            
+
                             return;
                         }
 
                         const contentType = getMIMEType(fullPath);
 
-                        console.log(contentType);
                         response.setHeader('Content-Type', contentType);
                         response.status(200).send(data);
                     });
 
                     return;
                 }
-                
+
                 new Response(socket, 500).send();
             });
         });
