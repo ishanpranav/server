@@ -1,0 +1,19 @@
+{
+  "name": "homework03-ishanpranav",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ishanpranav/server.git"
+  },
+  "author": "Ishan Pranav",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/ishanpranav/server/issues"
+  },
+  "homepage": "https://github.com/ishanpranav/server#readme"
+}
