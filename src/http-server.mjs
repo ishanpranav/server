@@ -2,7 +2,7 @@
 // Copyright (c) 2024 Ishan Pranav
 // Licensed under the MIT license.
 
-import { access, constants, readFile } from 'fs';
+import { access, constants, readFile, stat } from 'fs';
 import { createServer } from 'net';
 import { join, sep } from 'path';
 import { Request } from './request.mjs';
@@ -69,25 +69,42 @@ export class HTTPServer {
         const fullPath = safeJoin(this.rootDirectory, request.path);
 
         access(fullPath, constants.F_OK, err => {
-            const response = new Response(socket, 404);
-
             if (err) {
+                const response = new Response(socket, 404);
+
                 response.setHeader('Content-Type', 'text/plain');
-                response.status(404).send();
+                response.send();
 
                 return;
             }
 
-            
-            response.status().send(data);
-        });
+            stat(fullPath, (err, stats) => {
+                if (err) {
+                    new Response(socket, 500).send();
 
-        // TODO: (see homework specification for details)
-        // 0. implementation can start here, but other classes / methods can be modified or added
-        // 1. handle redirects first
-        // 2. if not a redirect and file/dir does not exist send back not found
-        // 3. if file, serve file
-        // 4. if dir, generate page that lists files and dirs contained in dir
-        // 5. if markdown, compile and send back html
+                    return;
+                }
+
+                if (stats.isDirectory()) {
+                    new Response(socket, 500).send();
+
+                    return;
+                }
+
+                if (stats.isFile()) {
+                    readFile(fullPath, (err, data) => {
+                        const response = new Response(socket);
+
+                        if (err) {
+                            response.status(500).send();
+                            
+                            return;
+                        }
+
+                        response.status(200).send(data);
+                    });
+                }
+            });
+        });
     }
 }
