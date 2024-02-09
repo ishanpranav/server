@@ -2,7 +2,7 @@
 // Copyright (c) 2024 Ishan Pranav
 // Licensed under the MIT license.
 
-import { mimeTypes } from './mime-types.mjs';
+import { mimeTypes } from './web-lib.mjs';
 
 const statusCodes = {
     '200': "OK",
@@ -35,19 +35,23 @@ export class Response {
             this.headers.set('Content-Type', mimeTypes.html);
         }
 
-        const description = statusCodes[this.statusCode];
-        const headersString = Object
-            .entries(this.headers)
-            .reduce((s, [name, value]) => `${s}${name}: ${value} \r\n`); // sic
+        const tokens = [
+            this.version, ' ',
+            this.statusCode, ' ',
+            statusCodes[this.statusCode], '\r\n'
+        ];
 
-        this.socket.write(
-            `${this.version} ${this.statusCode} ${description}\r\n`);
-        this.socket.write(`${headersString}\r\n`);
-
+        for (const [name, value] of this.headers.entries()) {
+            tokens.push(name, ': ', value, '\r\n');
+        }
+        
         if (body) {
-            this.socket.write(body);
+            this.body = body;
+
+            tokens.push('\r\n', body);
         }
 
+        this.socket.write(tokens.join(""));
         this.socket.end();
     }
 }

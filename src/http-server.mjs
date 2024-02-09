@@ -3,9 +3,14 @@
 // Licensed under the MIT license.
 
 import { createServer } from 'net';
+import * as path from 'path';
 import { Request } from './request.mjs';
 import { Response } from './response.mjs';
-import * as path from 'path';
+import { getMIMEType } from './web-lib.mjs';
+
+function safeJoin(rootDirectory, untrustedPath) {
+    return path.join(rootDirectory, path.join(path.sep, untrustedPath));
+}
 
 /** Represents an HTTP server. */
 export class HTTPServer {
@@ -34,7 +39,7 @@ export class HTTPServer {
     /**
      * Handles a new connection.
      * 
-     * @param {*} socket the TCP/IP socket.
+     * @param {Socket} socket the TCP/IP socket.
      */
     handleConnection(socket) {
         socket.on('data', data => this.handleRequest(socket, data));
@@ -43,13 +48,26 @@ export class HTTPServer {
     /**
      * Handles a new request.
      * 
-     * @param {*} socket the TCP/IP socket.
-     * @param {*} data   the raw request data.
+     * @param {Socket} socket the TCP/IP socket.
+     * @param {*}      data   the raw request data.
      */
     handleRequest(socket, data) {
         const request = new Request(data.toString());
         const response = new Response(socket);
-        const fullPath = path.join(this.rootDirectory, request.path);
+
+        if (Object.hasOwn(this.redirects, request.path)) {
+            const redirect = this.redirects[request.path];
+
+            response.setHeader('Location', redirect);
+            response.setHeader('Content-Type', getMIMEType(redirect));
+            response.status(308).send();
+
+            return;
+        }
+
+        const fullPath = safeJoin(this.rootDirectory, request.path);
+
+        response.status(200).send("<html>" + fullPath + "</html>");
 
         // TODO: (see homework specification for details)
         // 0. implementation can start here, but other classes / methods can be modified or added
