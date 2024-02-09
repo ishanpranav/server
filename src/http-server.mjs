@@ -5,6 +5,7 @@
 import { createServer } from 'net';
 import { Request } from './request.mjs';
 import { Response } from './response.mjs';
+import * as path from 'path';
 
 /** Represents an HTTP server. */
 export class HTTPServer {
@@ -46,9 +47,9 @@ export class HTTPServer {
      * @param {*} data   the raw request data.
      */
     handleRequest(socket, data) {
-        const request = new Request(data.toString());
-        const response = new Response(socket);
-        const fullPath = path.join(this.rootDirectory, request.path);
+        // const request = new Request(data.toString());
+        // const response = new Response(socket);
+        // const fullPath = path.join(this.rootDirectory, request.path);
 
         // TODO: (see homework specification for details)
         // 0. implementation can start here, but other classes / methods can be modified or added

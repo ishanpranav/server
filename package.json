@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "lint": "eslint src/*.mjs"
   },
   "repository": {
     "type": "git",
@@ -15,5 +16,9 @@
   "bugs": {
     "url": "https://github.com/ishanpranav/server/issues"
   },
-  "homepage": "https://github.com/ishanpranav/server#readme"
+  "homepage": "https://github.com/ishanpranav/server#readme",
+  "devDependencies": {
+    "eslint": "^8.56.0",
+    "eslint-plugin-mocha": "^10.2.0"
+  }
 }
