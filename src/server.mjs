@@ -1,7 +1,3 @@
-import * as webLib from './web-lib.mjs';
-import * as path from "path";
-import * as fs from "fs";
-
-import { fileURLToPath } from 'url';
-
-// TODO: configure and start server
+// server.mjs
+// Copyright (c) 2024 Ishan Pranav
+// Licensed under the MIT license.
