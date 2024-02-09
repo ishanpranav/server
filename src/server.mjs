@@ -16,7 +16,6 @@ readFile(join(directoryName, 'config.json'), (err, data) => {
     }
 
     const config = JSON.parse(data);
-    
     const httpServer = new HTTPServer(
         join(directoryName, '..', config['root_directory']),
         config['redirect_map']);

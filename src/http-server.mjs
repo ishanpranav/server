@@ -10,6 +10,11 @@ import { Response } from './response.mjs';
 import { mimeTypes } from './web-lib.mjs';
 import MarkdownIt from 'markdown-it';
 
+const postprocessors = {
+    'md': convertMarkdownToHtml,
+    'markdown': convertMarkdownToHtml
+};
+
 function safeJoin(rootDirectory, untrustedPath) {
     return join(rootDirectory, join(sep, untrustedPath));
 }
@@ -61,21 +66,12 @@ function getExtension(fileName) {
     return formatPath;
 }
 
-function postprocess(fileName, data) {
-    const extension = getExtension(fileName);
+function convertMarkdownToHtml(data) {
+    const options = {
+        html: true
+    };
 
-    switch (extension) {
-        case 'md':
-        case 'markdown': {
-            const options = {
-                html: true
-            };
-
-            return new MarkdownIt(options).render(data.toString());
-        }
-    }
-
-    return data;
+    return new MarkdownIt(options).render(data.toString());
 }
 
 /** Represents an HTTP server. */
@@ -183,11 +179,14 @@ export class HTTPServer {
                         }
 
                         const contentType = getMIMEType(fullPath);
+                        const extension = getExtension(fullPath);
+
+                        if (Object.hasOwn(postprocessors, extension)) {
+                            data = postprocessors[extension](data);
+                        }
 
                         response.setHeader('Content-Type', contentType);
-                        response
-                            .status(200)
-                            .send(postprocess(fullPath, data));
+                        response.status(200).send(data);
                     });
 
                     return;
