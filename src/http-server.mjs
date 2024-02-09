@@ -24,7 +24,7 @@ function generateIndex(directoryName, entries) {
     <title>Index of `, directoryName, `</title>
 </head>
 <!-- Licensed under the MIT License. -->
-<body>` ];
+<body>`];
 
     for (const entry of entries) {
         tokens.push('    <a href="', entry.name);
@@ -66,12 +66,13 @@ function postprocess(fileName, data) {
 
     switch (extension) {
         case 'md':
-        case 'markdown':
+        case 'markdown': {
             const options = {
                 html: true
             };
 
-            return new MarkdownIt(options).render(data.toString());        
+            return new MarkdownIt(options).render(data.toString());
+        }
     }
 
     return data;
