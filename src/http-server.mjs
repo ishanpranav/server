@@ -2,14 +2,15 @@
 // Copyright (c) 2024 Ishan Pranav
 // Licensed under the MIT license.
 
+import { access, constants, readFile } from 'fs';
 import { createServer } from 'net';
-import * as path from 'path';
+import { join, sep } from 'path';
 import { Request } from './request.mjs';
 import { Response } from './response.mjs';
 import { getMIMEType } from './web-lib.mjs';
 
 function safeJoin(rootDirectory, untrustedPath) {
-    return path.join(rootDirectory, path.join(path.sep, untrustedPath));
+    return join(rootDirectory, join(sep, untrustedPath));
 }
 
 /** Represents an HTTP server. */
@@ -53,21 +54,33 @@ export class HTTPServer {
      */
     handleRequest(socket, data) {
         const request = new Request(data.toString());
-        const response = new Response(socket);
 
         if (Object.hasOwn(this.redirects, request.path)) {
             const redirect = this.redirects[request.path];
+            const response = new Response(socket, 308);
 
             response.setHeader('Location', redirect);
             response.setHeader('Content-Type', getMIMEType(redirect));
-            response.status(308).send();
+            response.send();
 
             return;
         }
 
         const fullPath = safeJoin(this.rootDirectory, request.path);
 
-        response.status(200).send("<html>" + fullPath + "</html>");
+        access(fullPath, constants.F_OK, err => {
+            const response = new Response(socket, 404);
+
+            if (err) {
+                response.setHeader('Content-Type', 'text/plain');
+                response.status(404).send();
+
+                return;
+            }
+
+            
+            response.status().send(data);
+        });
 
         // TODO: (see homework specification for details)
         // 0. implementation can start here, but other classes / methods can be modified or added
