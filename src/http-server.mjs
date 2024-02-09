@@ -10,14 +10,14 @@ import { Response } from './response.mjs';
 import { mimeTypes } from './web-lib.mjs';
 import MarkdownIt from 'markdown-it';
 
-const postprocessors = {
-    'md': convertMarkdownToHtml,
-    'markdown': convertMarkdownToHtml
+const convertMarkdownToHTML = data => {
+    return new MarkdownIt({ html: true }).render(data.toString());
 };
 
-function convertMarkdownToHtml(data) {
-    return new MarkdownIt({ html: true }).render(data.toString());
-}
+const postprocessors = {
+    'md': convertMarkdownToHTML,
+    'markdown': convertMarkdownToHTML
+};
 
 function safeJoin(rootDirectory, untrustedPath) {
     return join(rootDirectory, join(sep, untrustedPath));
