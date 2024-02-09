@@ -15,6 +15,10 @@ const postprocessors = {
     'markdown': convertMarkdownToHtml
 };
 
+function convertMarkdownToHtml(data) {
+    return new MarkdownIt({ html: true }).render(data.toString());
+}
+
 function safeJoin(rootDirectory, untrustedPath) {
     return join(rootDirectory, join(sep, untrustedPath));
 }
@@ -64,14 +68,6 @@ function getExtension(fileName) {
     }
 
     return formatPath;
-}
-
-function convertMarkdownToHtml(data) {
-    const options = {
-        html: true
-    };
-
-    return new MarkdownIt(options).render(data.toString());
 }
 
 /** Represents an HTTP server. */
