@@ -2,7 +2,7 @@
 // Copyright (c) 2024 Ishan Pranav
 // Licensed under the MIT license.
 
-import { access, constants, readFile, stat } from 'fs';
+import { access, constants, readdir, readFile, stat } from 'fs';
 import { createServer } from 'net';
 import { join, sep } from 'path';
 import { Request } from './request.mjs';
@@ -86,7 +86,17 @@ export class HTTPServer {
                 }
 
                 if (stats.isDirectory()) {
-                    new Response(socket, 500).send();
+                    readdir(fullPath, { withFileTypes: true }, (err, files) => {
+                        if (err) {
+                            new Response(socket, 500).send();
+
+                            return;
+                        }
+
+                        for (const file of files) {
+
+                        }
+                    });
 
                     return;
                 }
@@ -101,9 +111,17 @@ export class HTTPServer {
                             return;
                         }
 
+                        const contentType = getMIMEType(fullPath);
+
+                        console.log(contentType);
+                        response.setHeader('Content-Type', contentType);
                         response.status(200).send(data);
                     });
+
+                    return;
                 }
+                
+                new Response(socket, 500).send();
             });
         });
     }

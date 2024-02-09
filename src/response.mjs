@@ -45,13 +45,15 @@ export class Response {
             tokens.push(name, ': ', value, '\r\n');
         }
         
+        tokens.push('\r\n');
+        this.socket.write(tokens.join(""));
+        
         if (body) {
             this.body = body;
-
-            tokens.push('\r\n', body);
+            
+            this.socket.write(body);
         }
 
-        this.socket.write(tokens.join(""));
         this.socket.end();
     }
 }
