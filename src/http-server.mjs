@@ -4,10 +4,11 @@
 
 import { access, constants, readdir, readFile, stat } from 'fs';
 import { createServer } from 'net';
-import { join, sep } from 'path';
+import { extname, join, sep } from 'path';
 import { Request } from './request.mjs';
 import { Response } from './response.mjs';
-import { getMIMEType } from './web-lib.mjs';
+import { mimeTypes } from './web-lib.mjs';
+import MarkdownIt from 'markdown-it';
 
 function safeJoin(rootDirectory, untrustedPath) {
     return join(rootDirectory, join(sep, untrustedPath));
@@ -38,6 +39,42 @@ function generateIndex(directoryName, entries) {
     tokens.push('</body>\n</html>');
 
     return tokens.join("");
+}
+
+function getMIMEType(fileName) {
+    const ext = extname(fileName);
+
+    if (ext.length) {
+        return mimeTypes[ext.substring(1)];
+    }
+
+    return null;
+}
+
+function getExtension(fileName) {
+    const formatPath = extname(fileName).toLowerCase();
+
+    if (formatPath.startsWith('.')) {
+        return formatPath.substring(1);
+    }
+
+    return formatPath;
+}
+
+function postprocess(fileName, data) {
+    const extension = getExtension(fileName);
+
+    switch (extension) {
+        case 'md':
+        case 'markdown':
+            const options = {
+                html: true
+            };
+
+            return new MarkdownIt(options).render(data.toString());        
+    }
+
+    return data;
 }
 
 /** Represents an HTTP server. */
@@ -147,7 +184,9 @@ export class HTTPServer {
                         const contentType = getMIMEType(fullPath);
 
                         response.setHeader('Content-Type', contentType);
-                        response.status(200).send(data);
+                        response
+                            .status(200)
+                            .send(postprocess(fullPath, data));
                     });
 
                     return;
