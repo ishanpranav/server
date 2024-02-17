@@ -32,6 +32,7 @@ function generateIndex(directoryName, entries) {
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
     <title>Index of `, directoryName, `</title>
 </head>
+<!-- Copyright (c) 2024 Ishan Pranav -->
 <!-- Licensed under the MIT License. -->
 <body>`];
 
