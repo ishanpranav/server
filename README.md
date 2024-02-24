@@ -7,6 +7,6 @@
 This is a static web server implemented in JavaScript for the NYU CSCI 467
 Applied Internet Technology course and distributed under the MIT License.
 
-# License
+## License
 
 This repository is licensed with the [MIT](LICENSE.txt) license.
